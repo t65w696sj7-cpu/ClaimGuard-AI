@@ -1037,3 +1037,288 @@ Identity securely re-verified
 Authorized security personnel approve restoration
 ↓
 Access restored with appropriate monitoring
+
+
+---
+
+## 33. Security and Operational Monitoring
+
+ClaimGuard should monitor both security threats and system health.
+
+### Security Monitoring
+
+Security monitoring should include both:
+
+- Fixed rule-based thresholds
+- User and system behavior that is unusual compared with normal activity
+
+### Example Security Signals
+
+- Excessive claim access attempts
+- Access to unrelated claims
+- Repeated denied requests
+- Abnormal document downloads
+- Sensitive-data access
+- Suspicious API activity
+- Activity at unusual times
+- Abnormal behavior from a specific account
+
+### Architecture Principle
+
+Known bad patterns should be detected through fixed rules.
+
+Unknown or unusual activity should also be identified through behavioral monitoring.
+
+---
+
+## 34. Security Event Severity
+
+Security events should be classified according to severity.
+
+### Severity Levels
+
+- Low
+- Medium
+- High
+- Critical
+
+### Example Response Strategy
+
+Low:
+- Log event
+- Continue monitoring
+
+Medium:
+- Log event
+- Increase monitoring
+- Notify security when appropriate
+
+High:
+- Alert security immediately
+- Restrict suspicious activity
+- Preserve evidence
+
+Critical:
+- Automatically contain the affected account or session
+- Revoke active access
+- Block further activity
+- Alert security and authorized management
+- Preserve forensic evidence
+
+### Architecture Principle
+
+Not every suspicious event requires the same response.
+
+Multiple suspicious indicators may combine to increase incident severity.
+
+---
+
+## 35. Critical Incident Alerting
+
+Critical incidents should generate immediate alerts.
+
+Containment should occur independently of the notification process.
+
+### Proposed AWS Capabilities
+
+- Amazon EventBridge
+- Amazon SNS
+- AWS Security Hub
+- Amazon CloudWatch
+- AWS CloudTrail
+
+### Architecture Principle
+
+Notification failure must never prevent automatic containment.
+
+---
+
+## 36. Incident Escalation Policy
+
+Critical incidents should follow a defined escalation process when they are not acknowledged.
+
+### Example Workflow
+
+1. Critical incident detected
+2. Automatic containment begins
+3. Primary security contact notified
+4. Acknowledgement window begins
+5. If no acknowledgement occurs, alert secondary security personnel
+6. If still unacknowledged, escalate to security leadership or authorized management
+
+### Incident History Should Record
+
+- Detection time
+- Incident severity
+- Containment actions
+- Personnel notified
+- Acknowledgement time
+- Escalation events
+- Incident owner
+
+### Architecture Principle
+
+Containment does not wait for acknowledgement.
+
+Escalation determines who takes ownership of the investigation.
+
+---
+
+## 37. Operational Health Monitoring
+
+ClaimGuard should monitor system health in addition to security activity.
+
+### Operational Metrics May Include
+
+- API latency
+- API error rates
+- Failed Lambda executions
+- Amazon SQS queue depth
+- Age of oldest queued message
+- Database health
+- Amazon Textract failures
+- Amazon Bedrock failures
+- RAG retrieval failures
+- Document-processing errors
+- Unusual cloud cost increases
+
+### Proposed AWS Service
+
+- Amazon CloudWatch
+
+### Architecture Principle
+
+A secure system that cannot process claims is still failing the business.
+
+---
+
+## 38. Catastrophe Demand Handling
+
+Large legitimate increases in claim volume should not automatically be treated as system failure.
+
+### Example Scenario
+
+A hurricane causes claim volume to increase eight times above normal.
+
+### Response Strategy
+
+1. Continue accepting claims
+2. Safely preserve claim data and evidence
+3. Allow Amazon SQS queues to absorb the processing backlog
+4. Preserve Critical, High, Standard, and Low priority handling
+5. Scale downstream processing capacity where appropriate
+6. Notify operations of processing delays
+7. Continue monitoring queue depth and message age
+
+### Customer Communication
+
+Customers may be informed that:
+
+Their claim has been safely received, but unusually high claim volume may increase processing time.
+
+### Architecture Principle
+
+Claim intake should remain available even when downstream processing is under extreme load.
+
+---
+
+## 39. Multi-Region Disaster Recovery
+
+ClaimGuard should support recovery from a major AWS regional outage.
+
+### Recovery Strategy
+
+- Primary AWS Region operates normally
+- Critical data is replicated to a secondary Region
+- Secondary Region operates as a warm standby
+- Regional outage triggers failover
+- Secondary environment scales up
+- Claim intake is restored before secondary AI capabilities
+
+### Architecture Principle
+
+Critical customer claim-intake capabilities receive recovery priority over nonessential AI and analytics features.
+
+---
+
+## 40. Warm Standby Strategy
+
+ClaimGuard should use a warm standby approach for disaster recovery.
+
+### Benefits
+
+- Lower cost than full active-active architecture
+- Faster recovery than rebuilding from backup
+- Critical services remain partially prepared
+- Secondary environment can scale when needed
+
+### Tradeoff
+
+Warm standby may recover slightly slower than full active-active architecture but provides a better balance between resilience, complexity, and cost for this scenario.
+
+---
+
+## 41. Recovery Point Objective
+
+Accepted claims are treated as critical business data.
+
+### Target RPO
+
+Near-zero data loss for successfully accepted claims.
+
+### Architecture Principle
+
+Once ClaimGuard confirms that a claim was successfully received, the architecture should minimize the possibility that the accepted claim or required evidence is lost during a regional disaster.
+
+---
+
+## 42. Recovery Time Objective
+
+Critical claim-intake functionality should be restored quickly after a regional outage.
+
+### Target RTO
+
+15 minutes or less for critical claim-intake capabilities.
+
+### Critical Recovery Functions
+
+- Customer authentication
+- Claim submission
+- Claim record creation
+- Evidence upload
+- Durable storage
+- Successful claim confirmation
+
+AI summaries, RAG, analytics, and other secondary capabilities may recover after critical intake services.
+
+---
+
+## 43. Disaster Recovery Testing
+
+Disaster recovery should be tested periodically rather than only during a real emergency.
+
+### DR Exercises Should Verify
+
+- Failover to the secondary Region
+- Customer authentication
+- Claim submission
+- Access to replicated evidence
+- Database recovery
+- Queue availability
+- Security controls
+- Critical service availability
+- Actual recovery time
+- Actual data-loss window
+
+### Architecture Principle
+
+Backups and replication are not sufficient by themselves.
+
+NorthStar should periodically prove that recovery works and measure results against the defined RTO and RPO.
+
+### Success Criteria
+
+- Critical claim intake restored within 15 minutes
+- Near-zero loss of accepted claim data
+- Security controls remain enforced
+- Claims can continue to be submitted
