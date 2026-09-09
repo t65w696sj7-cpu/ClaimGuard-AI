@@ -360,3 +360,248 @@ Next:
 - Design notification services
 - Design backup and disaster recovery
 - Design observability and cost controls
+
+
+---
+
+## 14. Document Intelligence and Extraction
+
+ClaimGuard must be able to extract useful information from scanned police reports, repair estimates, claim forms, photographs, and other supporting documents without modifying the original evidence.
+
+### Proposed AWS Service
+
+- Amazon Textract
+
+### Responsibilities
+
+Amazon Textract can be used to extract:
+
+- Names
+- Dates
+- Claim-related identifiers
+- Police report numbers
+- Vehicle information
+- Accident locations
+- Form fields
+- Tables
+- Narrative text
+- Repair estimate information
+
+### Architecture Principle
+
+Original evidence remains unchanged.
+
+Extracted information and processing artifacts are stored separately from the original customer-submitted documents.
+
+---
+
+## 15. Extraction Confidence and Human Verification
+
+ClaimGuard should not automatically trust low-confidence extracted information.
+
+### Workflow
+
+1. Document is processed
+2. Information is extracted
+3. Extraction confidence is evaluated
+4. High-confidence information may continue through processing
+5. Low-confidence or ambiguous information is flagged
+6. Assigned adjuster reviews the original document
+7. Adjuster corrects or verifies the extracted value
+
+### Example
+
+If ClaimGuard reads a handwritten accident location as:
+
+Harford Road — 65% confidence
+
+the field should be marked:
+
+Adjuster Verification Required
+
+### Architecture Principle
+
+When confidence is insufficient, human verification takes priority over automated interpretation.
+
+---
+
+## 16. AI-Assisted Claim Pre-Review
+
+ClaimGuard is designed to reduce the amount of time adjusters spend manually organizing and reading claim files.
+
+Claims may be pre-reviewed before an adjuster opens them.
+
+### Pre-Review May Include
+
+- Organizing claim documents
+- Identifying missing information
+- Extracting important facts
+- Summarizing long documents
+- Comparing new and previous documents
+- Identifying discrepancies
+- Determining claim priority based on approved business rules
+- Preparing an adjuster claim brief
+
+### Example Claim Brief
+
+The adjuster may see:
+
+- Claim number
+- Customer or claimant name
+- Date of birth
+- Date of loss
+- Reason for claim
+- Priority
+- Identification status
+- Police report status
+- Missing information
+- Conflicting information
+- Documents available
+- Items requiring human review
+
+Sensitive information such as Social Security numbers should be masked unless full access is specifically required and authorized.
+
+### Architecture Principle
+
+ClaimGuard prepares the claim.
+
+The adjuster remains responsible for consequential claim decisions.
+
+---
+
+## 17. Retrieval-Augmented Generation
+
+ClaimGuard should not repeatedly send an entire claim package through an AI model every time an adjuster asks a question.
+
+Previously processed information should be indexed and retrieved when needed.
+
+### Proposed AWS Services
+
+- Amazon Bedrock
+- Amazon Bedrock Knowledge Bases
+- Vector search capability such as Amazon OpenSearch Serverless
+
+### Processing Flow
+
+1. Documents are extracted and processed
+2. Processed text is divided into searchable chunks
+3. Metadata is attached to every chunk
+4. Chunks are indexed for semantic retrieval
+5. Adjuster asks a question
+6. ClaimGuard filters retrieval to the authorized claim
+7. Relevant chunks are retrieved
+8. Amazon Bedrock generates an answer grounded in those sources
+
+### Example Question
+
+Why was this repair estimate flagged?
+
+Instead of processing the entire claim again, ClaimGuard retrieves the relevant current estimate, previous estimate, extracted dollar amounts, and discrepancy information.
+
+### Business Benefits
+
+- Faster AI responses
+- Lower AI processing cost
+- Reduced duplicate processing
+- More focused answers
+- Better support for large adjuster workloads
+
+---
+
+## 18. RAG Metadata and Claim Isolation
+
+Every indexed document chunk should contain metadata that identifies where the information belongs.
+
+### Example Metadata
+
+- Claim ID
+- Document ID
+- Document type
+- Source document
+- Page number
+- Section
+- Upload date
+- Processing version
+- Assigned adjuster
+- Claim priority
+
+### Architecture Principle
+
+Text describes what the information means.
+
+Metadata identifies where the information belongs.
+
+Retrieval must be restricted to the appropriate claim and authorized personnel.
+
+ClaimGuard should never retrieve information from an unrelated claim simply because the text is semantically similar.
+
+---
+
+## 19. Grounded AI Responses
+
+ClaimGuard should provide evidence alongside AI-generated answers.
+
+When an adjuster asks a question, the response should identify the documents used to produce the answer.
+
+### Example
+
+ClaimGuard may report:
+
+The latest repair estimate is significantly higher than the previous estimate.
+
+Sources:
+
+- Current Repair Estimate — Page 2 — Repair Items
+- Previous Repair Estimate — Page 1 — Estimate Total
+
+### Source Metadata
+
+AI responses should preserve references to:
+
+- Source document
+- Page number
+- Section
+- Document version
+- Claim ID
+
+### Architecture Principle
+
+AI responses should be verifiable.
+
+The adjuster should be able to review the original evidence supporting an AI-generated answer instead of being expected to trust the AI response alone.
+
+---
+
+## Updated Processing Flow
+
+Customer  
+↓  
+Amazon Cognito  
+↓  
+Amazon API Gateway / AWS Lambda  
+↓  
+Amazon Aurora PostgreSQL + Amazon S3 Original Evidence  
+↓  
+Amazon SQS  
+↓  
+Amazon Textract  
+↓  
+Extraction Confidence Check  
+↓  
+Human Verification When Required  
+↓  
+Processed / Derived Storage  
+↓  
+Chunking + Metadata  
+↓  
+Amazon Bedrock Knowledge Base / Vector Index  
+↓  
+Relevant Claim Information Retrieved  
+↓  
+Amazon Bedrock  
+↓  
+Grounded Claim Brief or Adjuster Answer  
+↓  
+Source Document + Page / Section  
+↓  
+Human Adjuster
