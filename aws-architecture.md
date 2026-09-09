@@ -810,3 +810,230 @@ Only affected components reprocessed
 New conflicts checked  
 ↓  
 Claim brief and retrieval index updated
+
+
+---
+
+## 26. Security Monitoring and Automatic Containment
+
+ClaimGuard should detect abnormal access behavior and automatically contain potentially compromised accounts.
+
+### Example Security Event
+
+An adjuster who normally accesses a limited number of assigned claims suddenly attempts to access hundreds of unrelated claims or download an abnormal volume of customer documents.
+
+### Response Workflow
+
+1. Detect abnormal access behavior
+2. Suspend the affected account or session
+3. Revoke active access
+4. Stop additional document access
+5. Notify authorized security and management personnel
+6. Preserve security evidence
+7. Begin investigation
+
+### Architecture Principle
+
+Contain suspicious activity immediately without automatically assuming that the employee is responsible for the activity.
+
+---
+
+## 27. Successful and Denied Access Logging
+
+ClaimGuard should preserve both successful and unsuccessful access attempts.
+
+### Security Records May Include
+
+- User or service identity
+- Claim ID
+- Document ID
+- Successful access
+- Denied access attempt
+- Download activity
+- Timestamp
+- Session information
+- Available device or network context
+- Action attempted
+
+### Architecture Principle
+
+Successful access identifies information that may have been exposed.
+
+Denied attempts help investigators understand the intended scope and pattern of an attack.
+
+---
+
+## 28. Protected Audit Records
+
+Critical security records should be stored separately from normal application activity and protected from unauthorized modification or deletion.
+
+### Proposed AWS Services
+
+- AWS CloudTrail
+- Amazon S3
+- Amazon S3 Object Lock where appropriate
+
+### Architecture Principle
+
+A compromised account should not be capable of erasing the evidence of its own activity.
+
+Security records should have defined retention requirements and tightly controlled deletion permissions.
+
+---
+
+## 29. Security Suspension and Account Restoration
+
+A security-suspended account should remain locked even if valid credentials are subsequently provided.
+
+### Recovery Workflow
+
+1. Account or session is suspended
+2. Active sessions are revoked
+3. Security incident is opened
+4. Audit evidence is reviewed
+5. User identity is securely re-verified
+6. Credentials or MFA are reset when necessary
+7. Authorized security personnel approve restoration
+8. New authenticated access is established
+9. Account may receive heightened monitoring following restoration
+
+### Architecture Principle
+
+Successful authentication does not override an active security suspension.
+
+---
+
+## 30. Fine-Grained Authorization
+
+Being authenticated as an adjuster should not automatically provide access to every claim or every action.
+
+Authorization should evaluate:
+
+- User identity
+- User role
+- Assigned claim
+- Requested resource
+- Requested action
+- Applicable permissions
+
+### Example
+
+An adjuster may be authorized to:
+
+- View an assigned claim
+- Review supporting evidence
+- Verify extracted information
+- Update permitted claim information
+
+The same adjuster may not be authorized to:
+
+- Access unrelated claims
+- Delete original evidence
+- Modify audit records
+- Change security policies
+- Perform unauthorized bulk exports
+
+### Proposed AWS Capabilities
+
+- AWS IAM
+- Role-based access control
+- Attribute-based access control
+- Application-level claim authorization
+
+### Architecture Principle
+
+Authentication establishes identity.
+
+Authorization determines what that identity may do to a specific resource.
+
+---
+
+## 31. Sensitive Data Masking
+
+Access to a claim should not automatically expose every sensitive field contained within that claim.
+
+### Sensitive Information May Include
+
+- Social Security numbers
+- Driver's license numbers
+- Dates of birth
+- Financial information
+- Other personally identifiable information
+
+### Example
+
+Normal View:
+
+SSN: ***-**-1234
+
+Full sensitive values should only be revealed when specifically authorized and required for a legitimate workflow.
+
+Sensitive-data access should be logged.
+
+### Architecture Principle
+
+Provide users with the minimum sensitive information necessary to perform their authorized responsibilities.
+
+---
+
+## 32. Encryption
+
+ClaimGuard should protect sensitive information both while it is stored and while it is moving through the system.
+
+### Encryption at Rest
+
+Encryption should be applied where appropriate to:
+
+- Amazon S3 evidence
+- Processed document storage
+- Amazon Aurora / RDS
+- Amazon SQS
+- Audit logs
+- Backups
+
+### Encryption in Transit
+
+Communication should use secure encrypted connections between:
+
+- Customers and ClaimGuard
+- ClaimGuard application components
+- AWS services
+- Adjusters and the dashboard
+
+### Proposed AWS Capabilities
+
+- AWS Key Management Service (KMS)
+- TLS / HTTPS
+- Service-specific encryption controls
+
+### Architecture Principle
+
+Sensitive claim information should remain protected both at rest and in transit.
+
+Access to encryption keys should follow least-privilege principles.
+
+---
+
+## Security Incident Flow
+
+Suspicious activity detected
+↓
+Account / session automatically contained
+↓
+Active access revoked
+↓
+Successful and denied attempts preserved
+↓
+Affected claims and documents identified
+↓
+Security and authorized management notified
+↓
+Audit evidence protected
+↓
+Investigation performed
+↓
+Identity securely re-verified
+↓
+Authorized security personnel approve restoration
+↓
+Access restored with appropriate monitoring
