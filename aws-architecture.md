@@ -605,3 +605,208 @@ Grounded Claim Brief or Adjuster Answer
 Source Document + Page / Section  
 ↓  
 Human Adjuster
+
+---
+
+## 20. Adjuster Dashboard and Workload Prioritization
+
+ClaimGuard should organize the adjuster's workload so the most urgent claims and verification issues are visible immediately.
+
+### Dashboard Sections
+
+- Critical
+- High
+- Needs Verification
+- Standard
+- Low
+
+### Architecture Principle
+
+Claim urgency should be the primary ordering factor.
+
+Waiting time may be used as a secondary factor so older claims are not forgotten.
+
+Authorized personnel may override system-assigned priority when necessary.
+
+---
+
+## 21. Verification Reasons on Claim Cards
+
+Claims requiring human verification should display the reason for the flag before the adjuster opens the claim.
+
+### Example Verification Reasons
+
+- Low-confidence document extraction
+- Missing document
+- Repair estimate conflict
+- Possible duplicate
+- Conflicting customer information
+- New information requiring verification
+
+### Architecture Principle
+
+The adjuster should understand why a claim requires attention without opening the entire file first.
+
+---
+
+## 22. Source-Directed Review
+
+When ClaimGuard identifies a problem in a document, the adjuster should be taken directly to the evidence that caused the flag.
+
+### Example Workflow
+
+1. Adjuster selects a verification flag
+2. ClaimGuard opens the original source document
+3. The relevant page or section is displayed
+4. The information that triggered the flag is highlighted
+5. The adjuster may review the entire original document if needed
+
+### Example
+
+Verification Required — Accident Location
+
+Extracted Value:
+
+Harford Road
+
+Confidence:
+
+65%
+
+Source:
+
+Police Report — Page 7
+
+### Adjuster Actions
+
+- Verify
+- Correct
+- Escalate
+
+---
+
+## 23. Correction Audit History
+
+When an adjuster corrects extracted information, ClaimGuard should preserve both the original extracted value and the verified correction.
+
+### Example
+
+Original Extraction:
+
+Harford Road — 65% confidence
+
+Verified Correction:
+
+Hartford Road
+
+Source:
+
+Police Report — Page 7
+
+### Architecture Principle
+
+Corrections should not erase processing history.
+
+ClaimGuard should maintain an auditable record of what the system originally extracted and what the authorized adjuster changed.
+
+---
+
+## 24. Dependency-Aware Reprocessing
+
+An adjuster correction should not require the entire claim to be processed again.
+
+ClaimGuard should determine which downstream components depended on the corrected information and refresh only those components.
+
+### Example
+
+If an accident location changes from:
+
+Harford Road
+
+to:
+
+Hartford Road
+
+ClaimGuard may need to refresh:
+
+- Claim brief
+- Extracted claim data
+- RAG index
+- Conflict checks
+- AI-generated summaries that referenced the location
+
+Unrelated documents and completed processing should not be repeated unnecessarily.
+
+### Architecture Principle
+
+Reprocess affected dependencies, not the entire claim.
+
+### Business Benefits
+
+- Lower cloud cost
+- Faster corrections
+- Reduced duplicate AI processing
+- More efficient claims operations
+
+---
+
+## 25. Conflicting Evidence Handling
+
+ClaimGuard should not automatically overwrite one source of evidence when another source contains different information.
+
+### Example
+
+Police Report — Page 7:
+
+Hartford Road
+
+Customer Claim Form:
+
+Harford Road
+
+### Workflow
+
+1. Preserve both values
+2. Preserve both source documents
+3. Flag the discrepancy
+4. Show the adjuster where each value originated
+5. Require human review
+6. Allow the adjuster to determine whether further verification is necessary
+
+### Architecture Principle
+
+Conflicting evidence should be preserved and traced to its source.
+
+ClaimGuard identifies the conflict.
+
+Authorized personnel determine what the conflict means and what action should be taken.
+
+---
+
+## Adjuster Workflow
+
+Adjuster signs in  
+↓  
+Prioritized workload displayed  
+↓  
+Critical / High / Needs Verification / Standard / Low  
+↓  
+Adjuster selects claim  
+↓  
+AI Claim Brief + Original Evidence displayed  
+↓  
+Verification flag selected  
+↓  
+Relevant source document opens to exact page / section  
+↓  
+Adjuster verifies, corrects, or escalates  
+↓  
+Correction stored in audit history  
+↓  
+Affected dependencies identified  
+↓  
+Only affected components reprocessed  
+↓  
+New conflicts checked  
+↓  
+Claim brief and retrieval index updated
